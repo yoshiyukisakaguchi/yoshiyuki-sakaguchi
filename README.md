@@ -45,6 +45,57 @@ jupyter lab
 3. 再利用可能なコードは `src/` にモジュール化する
 4. 分析結果のグラフは `reports/figures/` に保存する
 
+## 重回帰分析パイプラインの実行
+
+### src/ の構成
+
+| ファイル | 役割 |
+|---|---|
+| `src/load_data.py` | CSV の読み込みとデータ概要表示 |
+| `src/preprocess.py` | 欠損値処理・外れ値除去・カテゴリ変数エンコード |
+| `src/regression.py` | 重回帰モデルの学習・評価・グラフ出力 |
+| `src/main.py` | 上記を統合したエントリーポイント |
+
+### 実行コマンド
+
+```bash
+# data/raw/sales.csv を読み込み、revenue 列を目的変数として分析する例
+python src/main.py --file sales.csv --target revenue
+```
+
+#### オプション一覧
+
+| オプション | デフォルト | 説明 |
+|---|---|---|
+| `--file` | （必須） | `data/raw/` に置いた CSV ファイル名 |
+| `--target` | （必須） | 目的変数の列名 |
+| `--outlier-cols` | なし | IQR 法で外れ値除去する列名（スペース区切り） |
+| `--missing-strategy` | `median` | 欠損値補完方法（`median` or `mean`） |
+| `--test-size` | `0.2` | テストデータの割合 |
+| `--no-scale` | false | 標準化をスキップ |
+| `--no-plots` | false | グラフ出力をスキップ |
+
+#### 実行例（オプションあり）
+
+```bash
+# 外れ値除去・欠損値を平均補完・テスト比率30%で実行
+python src/main.py \
+  --file housing.csv \
+  --target price \
+  --outlier-cols sqft bedrooms \
+  --missing-strategy mean \
+  --test-size 0.3
+```
+
+### 出力
+
+- **コンソール**: データ概要・回帰係数・評価指標（R²・RMSE・MAE）
+- **`data/processed/`**: 前処理済み CSV
+- **`reports/figures/`**: 以下の 3 つのグラフ（PNG）
+  - `actual_vs_predicted.png` — 実測値 vs 予測値
+  - `coefficients.png` — 回帰係数の棒グラフ
+  - `residuals.png` — 残差プロット
+
 ## 依存パッケージ
 
 | パッケージ | 用途 |
